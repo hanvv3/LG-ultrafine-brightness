@@ -119,7 +119,7 @@ int main(int argc, char* argv[]) {
     } else {
         // New command-line options
         int displayIndex = std::stoi(argv[2]);
-        if (displayIndex >= cnt) {
+        if (displayIndex >= lg_cnt) {
             std::cerr << "Invalid display index." << std::endl;
             libusb_free_device_list(devs, 1);
             return 1;
