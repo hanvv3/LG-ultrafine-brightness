@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <curses.h>
 #include <unistd.h>
-#include <cmath>
 #include "UltrafineDisplay.h"
 
 UltrafineDisplay::UltrafineDisplay(libusb_device *lg_usb) {
@@ -73,7 +72,8 @@ void UltrafineDisplay::set_brightness(uint16_t val) {
 
 uint8_t UltrafineDisplay::get_brightness_level() {
   uint16_t brightness = get_brightness();
-  return uint8_t(round((float(brightness) / 54000) * 100.0));
+  
+  return uint8_t((float(brightness) / 54000) * 100.0);
 }
 
 void UltrafineDisplay::set_brightness_level(uint8_t val) {
