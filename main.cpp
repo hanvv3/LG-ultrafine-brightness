@@ -124,7 +124,7 @@ int main(int argc, char* argv[]) {
             libusb_free_device_list(devs, 1);
             return 1;
         }
-        UltrafineDisplay display(devs[displayIndex]);
+        UltrafineDisplay display(lgdevs[displayIndex]);
 
         if (std::string(argv[1]) == "--get-brightness") {
             if (argc != 3) {
@@ -132,7 +132,7 @@ int main(int argc, char* argv[]) {
                 libusb_free_device_list(devs, 1);
                 return 1;
             }
-            std::cout << "Current brightness: " << display.get_brightness() << std::endl;
+            std::cout << "Current brightness: " << display.get_brightness_level() << std::endl;
         } else if (std::string(argv[1]) == "--set-brightness") {
             if (argc != 4) {
                 std::cerr << "Usage: " << argv[0] << " --set-brightness [display_index] [brightness_value]" << std::endl;
@@ -140,7 +140,7 @@ int main(int argc, char* argv[]) {
                 return 1;
             }
             uint16_t brightnessValue = std::stoi(argv[3]);
-            display.set_brightness(brightnessValue);
+            display.set_brightness_level(brightnessValue);
             std::cout << "Brightness set to: " << brightnessValue << std::endl;
         } else {
             std::cerr << "Invalid option provided. Use --set-brightness or --get-brightness or provide no options for original functionality." << std::endl;
