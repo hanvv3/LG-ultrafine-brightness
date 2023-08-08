@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <curses.h>
 #include <unistd.h>
-#include <cmath.h>
+#include <cmath>
 #include "UltrafineDisplay.h"
 
 UltrafineDisplay::UltrafineDisplay(libusb_device *lg_usb) {
