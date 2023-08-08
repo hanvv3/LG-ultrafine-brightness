@@ -82,25 +82,31 @@ int main() {
 	getch();
 	endwin();
 	return -2;
-  }
-  int end = false;
-  while(!end){
-	printw("Get %d UltraFine display\n", lg_cnt);
-	vector<UltrafineDisplay> Display_pool;
-	for (int i = 0; i < lg_cnt; i++) {
-	  Display_pool.emplace_back(lgdevs[i]);
-	  printw("Find Ultrafine Display %s brightness %d. [press %d to choose]\n", Display_pool[i].getDisplayName() ,Display_pool[i].get_brightness_level(), i);
-	}
-	char c = getch();
-	if(c == 'q'){
-	  printw("Press q to exit\n");
-	  break;
-	}
-	int chooseDisplay = atoi(&c);
-	clear();
-	Display_pool[chooseDisplay].interactive();
-	for(auto &a : Display_pool){
-	  a.LG_Close();
+  // If only one display is detected
+  } else if (lg_cnt == 1) {
+    UltrafineDisplay display(lgdevs[0]);
+    display.interactive();
+    display.LG_Close();
+  } else {
+	int end = false;
+	while(!end){
+		printw("Get %d UltraFine display\n", lg_cnt);
+		vector<UltrafineDisplay> Display_pool;
+		for (int i = 0; i < lg_cnt; i++) {
+			Display_pool.emplace_back(lgdevs[i]);
+			printw("Find Ultrafine Display %s brightness %d. [press %d to choose]\n", Display_pool[i].getDisplayName() ,Display_pool[i].get_brightness_level(), i);
+		}
+		char c = getch();
+		if(c == 'q'){
+			printw("Press q to exit\n");
+			break;
+		}
+		int chooseDisplay = atoi(&c);
+		clear();
+		Display_pool[chooseDisplay].interactive();
+		for(auto &a : Display_pool) {
+			a.LG_Close();
+		}
 	}
   }
 
