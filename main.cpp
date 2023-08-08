@@ -114,7 +114,6 @@ int main(int argc, char* argv[]) {
                 }
             }
             endwin();
-            return 0;
         }
     } else {
         // New command-line options
