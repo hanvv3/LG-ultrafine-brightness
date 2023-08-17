@@ -76,9 +76,9 @@ int main(int argc, char* argv[]) {
 	lg_cnt = get_lg_ultrafine_usb_devices(devs, cnt, &lgdevs);
 
     if (lg_cnt < 1) {
-        printw("* Error: No device found.\n");
-        printw("\tThere must be at least one LG Ultrafine Display.\n");
-        printw("\tTry reconnecting / restarting your device to recognize Thunderbolt I/O.\n");
+        printw("Error: No device found.\n");
+        printw("\t* There must be at least one LG Ultrafine Display.\n");
+        printw("\t* Try reconnecting / restarting your device to recognize Thunderbolt I/O.\n");
         getch();
         endwin();
         libusb_free_device_list(devs, 1);
