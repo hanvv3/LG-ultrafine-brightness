@@ -12,7 +12,7 @@ using std::unordered_map;
 using std::vector;
 const uint16_t LG_ID_Vendor = 0x43e;
 
-unordered_map<uint16_t, char *> support_device = {
+unordered_map<uint16_t, const char *> support_device = {
 	{0x9a63, "24MD4KL"},
 	{0x9a70, "27MD5KL"},
 	{0x9a40, "27MD5KA"}
@@ -45,12 +45,13 @@ static int get_lg_ultrafine_usb_devices(libusb_device **devs, int usb_cnt, libus
     return lg_cnt;
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, const char* argv[]) {
     initscr();
     noecho();
     cbreak();
 
 	libusb_device **devs;
+    libusb_device **lgdevs;
 	libusb_context *ctx = NULL;
 	int r;
 	int cnt;
@@ -72,7 +73,6 @@ int main(int argc, char* argv[]) {
 	}
 
 	int lg_cnt = 0;
-	libusb_device **lgdevs;
 	lg_cnt = get_lg_ultrafine_usb_devices(devs, cnt, &lgdevs);
 
     if (lg_cnt < 1) {
@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) {
         return -2;
     }
 
-    if (argc == 1) {
+    if (1 == argc) {
         // If only one display is detected
         if (lg_cnt == 1) {
             UltrafineDisplay display(lgdevs[0]);
@@ -95,11 +95,12 @@ int main(int argc, char* argv[]) {
         } else {
             int end = false;
             while(!end){
-                printw("Get %d UltraFine display\n", lg_cnt);
+                printw("Found %d LG UltraFine display(s).\n", lg_cnt);
                 vector<UltrafineDisplay> Display_pool;
                 for (int i = 0; i < lg_cnt; i++) {
                     Display_pool.emplace_back(lgdevs[i]);
-                    printw("Find Ultrafine Display %s brightness %d. [press %d to choose]\n", Display_pool[i].getDisplayName() ,Display_pool[i].get_brightness_level(), i);
+                    printw("LG Ultrafine Display %s  brightness %d. [press %d to select]\n", \
+                    Display_pool[i].getDisplayName() ,Display_pool[i].get_brightness_level(), i);
                 }
                 char c = getch();
                 if(c == 'q'){
@@ -115,37 +116,61 @@ int main(int argc, char* argv[]) {
             }
             endwin();
         }
-    } else {
-        // New command-line options
-        int displayIndex = std::stoi(argv[2]);
-        if (displayIndex >= lg_cnt) {
-            std::cerr << "Invalid display index." << std::endl;
+
+    // New command-line options
+    } else if ("--get-brightness" == std::string(argv[1])) {
+        if (3 < argc) {
+            std::cerr << "Usage: " << argv[0] << " --get-brightness [display_index]" << std::endl;
             libusb_free_device_list(devs, 1);
             return 1;
-        }
-        UltrafineDisplay display(lgdevs[displayIndex]);
-
-        if (std::string(argv[1]) == "--get-brightness") {
-            if (argc != 3) {
-                std::cerr << "Usage: " << argv[0] << " --get-brightness [display_index]" << std::endl;
+        } else if (3 == argc) {
+            int displayIndex = std::stoi(argv[2]);
+            if (displayIndex >= lg_cnt) {
+                std::cerr << "Invalid display index." << std::endl;
                 libusb_free_device_list(devs, 1);
                 return 1;
             }
-            std::cout << "Current brightness: " << display.get_brightness_level() << std::endl;
-        } else if (std::string(argv[1]) == "--set-brightness") {
-            if (argc != 4) {
-                std::cerr << "Usage: " << argv[0] << " --set-brightness [display_index] [brightness_value]" << std::endl;
+            UltrafineDisplay display(lgdevs[displayIndex]);
+            int brightnessLevel = static_cast<int>(display.get_brightness_level());
+            std::cout << displayIndex << "\t" << display.getDisplayName() << "\t\tbrightness: " << brightnessLevel << " ";
+        } else {
+            for (int i=0; i<lg_cnt; i++) {
+                UltrafineDisplay dispArray(lgdevs[i]);
+                int brightnessLevel = static_cast<int>(dispArray.get_brightness_level());
+                std::cout << i << "\t" << dispArray.getDisplayName() << "\t\tbrightness: " << brightnessLevel << " ";
+            }
+        }
+    } else if ("--set-brightness" == std::string(argv[1])) {
+        if (4 == argc) {
+            int displayIndex = std::stoi(argv[2]);
+            if (displayIndex >= lg_cnt) {
+                std::cerr << "Invalid display index." << std::endl;
                 libusb_free_device_list(devs, 1);
                 return 1;
             }
             uint16_t brightnessValue = std::stoi(argv[3]);
+            UltrafineDisplay display(lgdevs[displayIndex]);
             display.set_brightness_level(brightnessValue);
             std::cout << "Brightness set to: " << brightnessValue << std::endl;
         } else {
-            std::cerr << "Invalid option provided. Use --set-brightness or --get-brightness or provide no options for original functionality." << std::endl;
+            std::cerr << "Usage: " << argv[0] << " --set-brightness [display_index] [brightness_value]" << std::endl;
             libusb_free_device_list(devs, 1);
             return 1;
         }
+    } else if ("--dim" == std::string(argv[1])) {
+        if (2 == argc) {
+            UltrafineDisplay display(lgdevs[0]);
+            display.dim_step();
+        }
+    } else if ("--brighten" == std::string(argv[1])) { 
+        if (2 == argc) {
+            UltrafineDisplay display(lgdevs[0]);
+            display.brighten_step();
+        }
+    } else {
+        std::cerr << "Invalid option provided. Use --set-brightness or --get-brightness or provide no options for original functionality." << std::endl;
+        libusb_free_device_list(devs, 1);
+        return 1;
     }
 
     // Cleanup

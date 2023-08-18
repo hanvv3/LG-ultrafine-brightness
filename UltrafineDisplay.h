@@ -20,7 +20,7 @@ static const int HID_REPORT_TYPE_INPUT = 0x01;
 static const int HID_REPORT_TYPE_OUTPUT = 0x02;
 static const int HID_REPORT_TYPE_FEATURE = 0x03;
 
-extern unordered_map<uint16_t, char *> support_device;
+extern unordered_map<uint16_t, const char *> support_device;
 
 class UltrafineDisplay {
  public:
@@ -31,6 +31,8 @@ class UltrafineDisplay {
   void set_brightness(uint16_t val);
   uint8_t get_brightness_level();
   void set_brightness_level(uint8_t);
+  void dim_step();
+  void brighten_step();
   char * getDisplayName();
   void interactive();
   void LG_Close();

@@ -72,7 +72,8 @@ void UltrafineDisplay::set_brightness(uint16_t val) {
 
 uint8_t UltrafineDisplay::get_brightness_level() {
   uint16_t brightness = get_brightness();
-  return uint8_t((float(brightness) / 54000) * 100.0);
+  uint8_t brightness_percentage = static_cast<uint8_t>((float(brightness) * 100.0 / 54000));
+  return std::min(std::max(brightness_percentage, uint8_t(0)), uint8_t(255));
 }
 
 void UltrafineDisplay::set_brightness_level(uint8_t val) {
@@ -80,23 +81,37 @@ void UltrafineDisplay::set_brightness_level(uint8_t val) {
   set_brightness(brightess);
 }
 
+void UltrafineDisplay::dim_step() {
+  int8_t brightnessVolume = get_brightness_level();
+  brightnessVolume -= brightness_step;
+  brightnessVolume = 0 > brightnessVolume ? 0 : brightnessVolume;
+  set_brightness_level(brightnessVolume);
+}
+
+void UltrafineDisplay::brighten_step() {
+  uint8_t brightnessVolume = get_brightness_level();
+  brightnessVolume += brightness_step;
+  brightnessVolume = 100 < brightnessVolume ? 100 : brightnessVolume;
+  set_brightness_level(brightnessVolume);
+}
+
 char * UltrafineDisplay::getDisplayName() {
   return DisplayType;
 }
 
 void UltrafineDisplay::interactive() {
-  uint8_t brightnessVolume;
+  int8_t brightnessVolume;
   brightnessVolume = get_brightness_level();
 
   printw("Press '-' or '=' to adjust brightnes.\n");
   printw("press 'i' to set brightness from 0 to 100.\n");
   printw("press 'm' to set max brightness.\n");
-  printw("press 'u' to choose another display.\n");
+  printw("press 'q' to quit.\n");
   printw("Current brghitness volume : %d\r", get_brightness_level());
   int stop = false;
   while(!stop){
 	clrtoeol();
-	usleep(400 * 1000);
+	usleep(70 * 1000);
 	printw("Current brghitness volume : %d\r", get_brightness_level());
 	int c = getch();
 	char buffer[128];
@@ -106,13 +121,13 @@ void UltrafineDisplay::interactive() {
 	  case '+':
 	  case '=':
 		brightnessVolume += brightness_step;
-		brightnessVolume = brightnessVolume > 100 ? 100 : brightnessVolume;
+		brightnessVolume = brightnessVolume >= 100 ? 100 : brightnessVolume;
 	    set_brightness_level(brightnessVolume);
 	    break;
 	  case '-':
 	  case '_':
 	    brightnessVolume -= brightness_step;
-	    brightnessVolume = brightnessVolume < 0 ? 0 : brightnessVolume;
+	    brightnessVolume = brightnessVolume <= 0 ? 0 : brightnessVolume;
 	    set_brightness_level(brightnessVolume);
 	    break;
 	  case 'i':
@@ -131,16 +146,15 @@ void UltrafineDisplay::interactive() {
 		printw("Press '-' or '=' to adjust brightnes.\n");
 		printw("press 'i' to set brightness from 0 to 100.\n");
 		printw("press 'm' to set max brightness.\n");
-		printw("press 'u' to choose another display.\n");
+		printw("press 'q' to quit.\n");
 		break;
 	  case 'm':
 	    set_brightness_level(100);
 	    break;
-	  case 'u':
 	  case 'q':
 	  case '\n':
-	    clear();
 		stop = true;
+		endwin();
 		break;
 	  default: break;
 	}
