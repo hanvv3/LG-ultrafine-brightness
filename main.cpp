@@ -58,7 +58,7 @@ int main(int argc, const char* argv[]) {
 
 	r = libusb_init(&ctx);
 	if (r < 0) {
-		printw("Failed to initialize 'libusb'. Exiting...\n");
+		printw("ERROR 101: INIT FAILURE.\n\t- Failed to initialize 'libusb'.  Exiting...\n");
 		getch();
 		endwin();
 		return r;
@@ -66,7 +66,7 @@ int main(int argc, const char* argv[]) {
 
 	cnt = libusb_get_device_list(ctx, &devs);
 	if (cnt < 0) {
-		printw("Failed to get device list. Try reconnecting the device. Exiting...\n");
+		printw("ERROR 202: DEVICES NOT FOUND.\n\t- Couldn't find any connected devices. Try reconnecting the device.  Exiting...\n");
 		getch();
 		endwin();
 		return -1;
@@ -76,9 +76,8 @@ int main(int argc, const char* argv[]) {
 	lg_cnt = get_lg_ultrafine_usb_devices(devs, cnt, &lgdevs);
 
     if (lg_cnt < 1) {
-        printw("Error: No device found.\n");
-        printw("\t* There must be at least one LG Ultrafine Display.\n");
-        printw("\t* Try reconnecting / restarting your device to recognize Thunderbolt I/O.\n");
+        printw("ERROR 303: No Ultrafine displays were found.\n");
+        printw("\t* If it's already connected, please try reconnecting or restarting the device to recognize Thunderbolt I/O.\n");
         getch();
         endwin();
         libusb_free_device_list(devs, 1);
