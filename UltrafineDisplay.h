@@ -36,6 +36,7 @@ class UltrafineDisplay {
   char * getDisplayName();
   void interactive();
   void LG_Close();
+  static int get_lg_ultrafine_usb_devices(libusb_device **devs, int usb_cnt, libusb_device ***lg_devs);
  private:
   char DisplayType[128];
   uint16_t product_id;
